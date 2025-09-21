@@ -11,7 +11,8 @@ import {
   Container
 } from '@mui/material';
 import GeofenceManager from './GeofenceManager';
-import UserManager from './UserManager'; // You'll create this
+import UserManager from './UserManager';
+import TouristFlowManager from './TouristFlowManager'; // New component
 
 const theme = createTheme({
   palette: {
@@ -21,6 +22,39 @@ const theme = createTheme({
     secondary: {
       main: '#FF9933', // Indian saffron for accent
     },
+    background: {
+      default: '#f5f7fa',
+      paper: '#ffffff',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h6: {
+      fontWeight: 600,
+    },
+  },
+  components: {
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontSize: '0.95rem',
+          fontWeight: 600,
+          minHeight: 64,
+          '&.Mui-selected': {
+            color: '#1976d2',
+          },
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        indicator: {
+          height: 3,
+          borderRadius: '3px 3px 0 0',
+        },
+      },
+    },
   },
 });
 
@@ -29,13 +63,25 @@ function TabPanel({ children, value, index, ...other }) {
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
+      id={`admin-tabpanel-${index}`}
+      aria-labelledby={`admin-tab-${index}`}
       {...other}
     >
-      {value === index && <Box>{children}</Box>}
+      {value === index && (
+        <Box sx={{ py: 3 }}>
+          {children}
+        </Box>
+      )}
     </div>
   );
+}
+
+// Function to add accessibility props to tabs
+function a11yProps(index) {
+  return {
+    id: `admin-tab-${index}`,
+    'aria-controls': `admin-tabpanel-${index}`,
+  };
 }
 
 function App() {
@@ -48,54 +94,68 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      
+
       {/* App Header */}
-      <AppBar position="static" elevation={2}>
+      <AppBar position="static" elevation={2} sx={{ background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)' }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
             🛡️ Tourist Safety Admin Panel
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>
+          <Typography variant="body2" sx={{ opacity: 0.9, display: { xs: 'none', sm: 'block' } }}>
             Risk Zone & User Management
           </Typography>
         </Toolbar>
       </AppBar>
 
       {/* Navigation Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: '#f5f5f5' }}>
+      <Box sx={{ 
+        borderBottom: 1, 
+        borderColor: 'divider', 
+        backgroundColor: 'background.paper',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
         <Container maxWidth="xl">
           <Tabs 
             value={currentTab} 
             onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{
               '& .MuiTab-root': {
-                minWidth: 120,
-                fontWeight: 'bold',
+                minWidth: { xs: 'auto', sm: 140 },
+                px: { xs: 2, sm: 3 },
               }
             }}
           >
             <Tab 
-              label="🗺️ Risk Zones" 
-              id="tab-0"
-              aria-controls="tabpanel-0"
+              label="🗺️ Risk Zones"
+              {...a11yProps(0)}
             />
             <Tab 
-              label="👥 Users" 
-              id="tab-1"
-              aria-controls="tabpanel-1"
+              label="👥 Users"
+              {...a11yProps(1)}
+            />
+            <Tab 
+              label="🌊 Tourist Flow"
+              {...a11yProps(2)}
             />
           </Tabs>
         </Container>
       </Box>
 
       {/* Tab Content */}
-      <Container maxWidth="xl" sx={{ py: 0 }}>
+      <Container maxWidth="xl" sx={{ minHeight: 'calc(100vh - 160px)' }}>
         <TabPanel value={currentTab} index={0}>
           <GeofenceManager />
         </TabPanel>
-        
+
         <TabPanel value={currentTab} index={1}>
           <UserManager />
+        </TabPanel>
+
+        <TabPanel value={currentTab} index={2}>
+          <TouristFlowManager />
         </TabPanel>
       </Container>
     </ThemeProvider>

@@ -12,8 +12,6 @@ import {
   Paper,
   Chip,
   Box,
-  IconButton,
-  Tooltip,
   TextField,
   InputAdornment,
   Alert,
@@ -24,7 +22,6 @@ import {
   Phone,
   CreditCard,
   Search,
-  ContentCopy,
   CheckCircle,
   Cancel
 } from '@mui/icons-material';
@@ -41,12 +38,27 @@ const mockUsers = [
     phone: 'U2FsdGVkX1+vP59nYoB0Qq7yLrX8QGqkoB/KKu1fDxSUHw==', // encrypted base64
     aadhaar: 'U2FsdGVkX18Fx0nVj5HgEZH50/kUMb5hZAjG9NgsxII=', // encrypted base64
     maskedAadhaar: '******5432',
-    blockchainHash: 'a1b2c3d4e5f6789012345678901234567',
     status: 'active',
-    signupDate: '2025-09-10T10:30:00.000Z',
-    lastLogin: '2025-09-13T08:15:00.000Z'
+    signupDate: '2025-09-10T10:30:00.000Z'
   },
-  // other users...
+  {
+    id: '2',
+    name: 'Priya Sharma',
+    phone: 'U2FsdGVkX19YmPQx7Zx6gF8+3rT4QGqkoB/KKu1fDxSUHw==', // encrypted base64
+    aadhaar: 'U2FsdGVkX18Gx1nVj5HgEZH50/kUMb5hZAjG9NgsxII=', // encrypted base64
+    maskedAadhaar: '******8901',
+    status: 'active',
+    signupDate: '2025-09-05T14:20:00.000Z'
+  },
+  {
+    id: '3',
+    name: 'Amit Patel',
+    phone: 'U2FsdGVkX1+wQ60nYoB0Qq7yLrX8QGqkoB/KKu1fDxSUHw==', // encrypted base64
+    aadhaar: 'U2FsdGVkX18Hx2nVj5HgEZH50/kUMb5hZAjG9NgsxII=', // encrypted base64
+    maskedAadhaar: '******2345',
+    status: 'inactive',
+    signupDate: '2025-08-28T09:15:00.000Z'
+  }
 ];
 
 function decryptAES(encryptedBase64) {
@@ -72,15 +84,12 @@ function UserManager() {
       setFilteredUsers(mockUsers);
       setLoading(false);
     }, 1000);
-
-    // TODO: Replace with Firebase onSnapshot to get real data and decrypt here
   }, []);
 
   useEffect(() => {
     const filtered = users.filter(user =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      decryptAES(user.phone).includes(searchTerm) ||
-      user.blockchainHash.toLowerCase().includes(searchTerm.toLowerCase())
+      decryptAES(user.phone).includes(searchTerm)
     );
     setFilteredUsers(filtered);
   }, [searchTerm, users]);
@@ -93,20 +102,6 @@ function UserManager() {
       hour: '2-digit',
       minute: '2-digit'
     });
-  };
-
-  const copyToClipboard = async (text, type) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopySuccess(`${type} copied!`);
-      setTimeout(() => setCopySuccess(''), 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-    }
-  };
-
-  const truncateHash = (hash) => {
-    return `${hash.substring(0, 8)}...${hash.substring(hash.length - 8)}`;
   };
 
   if (loading) {
@@ -129,7 +124,7 @@ function UserManager() {
                 Users Management
               </Typography>
               <Typography variant="body1" color="text.secondary" mt={1}>
-                Monitor active users with encrypted sensitive data and blockchain IDs
+                Monitor active users with encrypted sensitive data
               </Typography>
             </Box>
             <TextField
@@ -196,10 +191,8 @@ function UserManager() {
                 <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
                   <TableCell><strong>User Details</strong></TableCell>
                   <TableCell><strong>Contact</strong></TableCell>
-                  <TableCell><strong>Blockchain ID</strong></TableCell>
                   <TableCell><strong>Status</strong></TableCell>
                   <TableCell><strong>Joined</strong></TableCell>
-                  <TableCell><strong>Last Active</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -209,72 +202,24 @@ function UserManager() {
                       <Box display="flex" alignItems="center">
                         <Person sx={{ mr: 2, color: '#FF9933', fontSize: 20 }} />
                         <Box>
-                          <Typography variant="body1" fontWeight="bold">
-                            {user.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                            <CreditCard sx={{ mr: 1, fontSize: 16 }} />
-                            {user.maskedAadhaar}
+                          <Typography variant="body1" fontWeight="bold">{user.name}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ display:'flex',alignItems:'center' }}>
+                            <CreditCard sx={{ mr:1,fontSize:16 }} />{user.maskedAadhaar}
                           </Typography>
                         </Box>
                       </Box>
                     </TableCell>
-
                     <TableCell>
                       <Box display="flex" alignItems="center">
-                        <Phone sx={{ mr: 1, color: '#138808', fontSize: 18 }} />
-                        <Typography variant="body2">
-                          +91 {decryptAES(user.phone)}
-                        </Typography>
+                        <Phone sx={{ mr:1,color:'#138808',fontSize:18 }} />
+                        <Typography variant="body2">+91 {decryptAES(user.phone)}</Typography>
                       </Box>
                     </TableCell>
-
                     <TableCell>
-                      <Box display="flex" alignItems="center">
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily: 'monospace',
-                            backgroundColor: '#f0f0f0',
-                            padding: '6px 10px',
-                            borderRadius: 1,
-                            mr: 1,
-                            fontSize: '0.85rem'
-                          }}
-                        >
-                          {truncateHash(user.blockchainHash)}
-                        </Typography>
-                        <Tooltip title="Copy Full Hash">
-                          <IconButton
-                            size="small"
-                            onClick={() => copyToClipboard(user.blockchainHash, 'Blockchain hash')}
-                          >
-                            <ContentCopy fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
+                      <Chip icon={user.status==='active'?<CheckCircle/>:<Cancel/>} label={user.status.toUpperCase()} color={user.status==='active'?'success':'warning'} size="small" sx={{fontWeight:'bold'}} />
                     </TableCell>
-
                     <TableCell>
-                      <Chip
-                        icon={user.status === 'active' ? <CheckCircle /> : <Cancel />}
-                        label={user.status.toUpperCase()}
-                        color={user.status === 'active' ? 'success' : 'warning'}
-                        size="small"
-                        sx={{ fontWeight: 'bold' }}
-                      />
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography variant="body2">
-                        {formatDate(user.signupDate)}
-                      </Typography>
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography variant="body2">
-                        {formatDate(user.lastLogin)}
-                      </Typography>
+                      <Typography variant="body2">{formatDate(user.signupDate)}</Typography>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -283,14 +228,10 @@ function UserManager() {
           </TableContainer>
 
           {/* No Results */}
-          {filteredUsers.length === 0 && (
+          {filteredUsers.length===0 && (
             <Box textAlign="center" py={6}>
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                No users found
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {searchTerm ? 'Try adjusting your search criteria' : 'No users have registered yet'}
-              </Typography>
+              <Typography variant="h6" color="text.secondary" gutterBottom>No users found</Typography>
+              <Typography variant="body2" color="text.secondary">{searchTerm?'Try adjusting your search criteria':'No users have registered yet'}</Typography>
             </Box>
           )}
         </CardContent>
