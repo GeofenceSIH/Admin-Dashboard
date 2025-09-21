@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import GeofenceManager from './GeofenceManager';
 import UserManager from './UserManager';
-import TouristFlowManager from './TouristFlowManager'; // New component
+ // New component
 
 const theme = createTheme({
   palette: {
@@ -136,10 +136,6 @@ function App() {
               label="👥 Users"
               {...a11yProps(1)}
             />
-            <Tab 
-              label="🌊 Tourist Flow"
-              {...a11yProps(2)}
-            />
           </Tabs>
         </Container>
       </Box>
@@ -154,9 +150,7 @@ function App() {
           <UserManager />
         </TabPanel>
 
-        <TabPanel value={currentTab} index={2}>
-          <TouristFlowManager />
-        </TabPanel>
+       
       </Container>
     </ThemeProvider>
   );
